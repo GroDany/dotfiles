@@ -7,13 +7,16 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Define targets
-NVIM_SRC="$SCRIPT_DIR/nvim"
-ALACRITTY_SRC="$SCRIPT_DIR/alacritty"
+NVIM_SRC="$SCRIPT_DIR/.config/nvim"
+ALACRITTY_SRC="$SCRIPT_DIR/.config/alacritty"
 GITIGNORE_SRC="$SCRIPT_DIR/.gitignore_global"
+TMUX_SRC="$SCRIPT_DIR/.config/tmux"
 
 NVIM_DEST="$HOME/.config/nvim"
 ALACRITTY_DEST="$HOME/.config/alacritty"
 GITIGNORE_DEST="$HOME/.gitignore_global"
+TMUX_DEST="$HOME/.config/tmux"
+TMUX_CONF_DEST="$HOME/.tmux.conf"
 
 # Mode: default is linux, can be wsl
 MODE="linux"
@@ -125,6 +128,12 @@ deploy_windows_alacritty() {
 
     echo "Copying Alacritty config to Windows: $dest_file"
     cp "$src/alacritty.toml" "$dest_file"
+    
+    # Append WSL shell configuration for Windows Alacritty
+    echo "" >> "$dest_file"
+    echo "[terminal.shell]" >> "$dest_file"
+    echo 'program = "wsl"' >> "$dest_file"
+    echo 'args = ["-d", "Ubuntu-24.04", "--cd", "~"]' >> "$dest_file"
 }
 
 # 1. Deploy Neovim config (always symlinked to Linux home directory)
@@ -145,5 +154,10 @@ deploy_symlink "$GITIGNORE_SRC" "$GITIGNORE_DEST"
 
 echo "Configuring git to use global gitignore..."
 git config --global core.excludesfile "$GITIGNORE_DEST"
+
+# 4. Deploy Tmux configuration
+echo "Deploying Tmux configuration..."
+deploy_symlink "$TMUX_SRC" "$TMUX_DEST"
+deploy_symlink "$TMUX_DEST/tmux.conf" "$TMUX_CONF_DEST"
 
 echo "Done! Dotfiles successfully deployed."

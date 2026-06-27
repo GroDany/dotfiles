@@ -4,7 +4,11 @@ local function ensure(repo)
 
     if vim.fn.isdirectory(install_path) == 0 then
         print("Installing " .. name .. "...")
-        vim.fn.system({ "git", "clone", "--depth=1", repo, install_path })
+        local cmd = { "git", "clone", "--depth=1", repo, install_path }
+        if name == "blink.cmp" then
+            cmd = { "git", "clone", "--depth=1", "--branch", "v1.9.1", repo, install_path }
+        end
+        vim.fn.system(cmd)
         vim.cmd("packadd " .. name)
     end
 end
@@ -25,6 +29,7 @@ local plugins = {
     "https://github.com/neovim/nvim-lspconfig",
     "https://github.com/stevearc/conform.nvim",
     "https://github.com/saghen/blink.cmp", 
+
 
     -- Utilities
     "https://github.com/folke/which-key.nvim",
